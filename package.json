@@ -1,0 +1,23 @@
+{
+  "name": "kubernetes_ci_cd_project",
+  "version": "1.0.0",
+  "description": "Kubernetes CI/CD project",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/sandy24998/KUBERNETES_CI_CD_PROJECT.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/sandy24998/KUBERNETES_CI_CD_PROJECT/issues"
+  },
+  "homepage": "https://github.com/sandy24998/KUBERNETES_CI_CD_PROJECT#readme",
+  "devDependencies": {
+    "express": "^4.21.2"
+  }
+}
