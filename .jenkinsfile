@@ -1,5 +1,13 @@
 pipeline {
     agent any
+
+    environment {
+        // Kubernetes details
+        KUBE_CONFIG = '$HOME/.kube/config'  // Path to the kubeconfig file
+        K8S_DEPLOYMENT_NAME = 'node-app-deployment'
+        K8S_NAMESPACE = 'default'
+    }
+
     stages {
         stage('Checkout') {
             steps {
@@ -40,11 +48,21 @@ pipeline {
                     // Set up kubectl to interact with your Kubernetes cluster
                     sh 'export KUBEVERSION=$(kubectl version --client=true | grep "Client Version" | awk '{print $3}'
 )'
-                    withCredentials([file(credentialsId: 'kubeconfig', variable: 'KUBECONFIG_FILE')]) {
+                    withCredentials(
+                        [
+                            file(
+                            credentialsId: 'kubeconfig',
+                            kubeconfigVariable: 'KUBECONFIG_FILE'),
+                            usernamePassword(
+                            credentialsId: 'DockerHubCred', 
+                            usernameVariable: 'DOCKER_USER', 
+                            passwordVariable: 'DOCKER_PASS'
+                        )]
+                    ) {
                         sh 'export KUBECONFIG=$KUBECONFIG_FILE'
                         // Apply Kubernetes deployment YAML file
                         sh '''
-                            kubectl set image deployment/${K8S_DEPLOYMENT_NAME} ${DOCKER_IMAGE}=${DOCKER_REGISTRY}/${DOCKER_IMAGE}:${DOCKER_TAG} --namespace=${K8S_NAMESPACE}
+                            kubectl set image deployment/${K8S_DEPLOYMENT_NAME} node-app:latest=${DOCKER_USER}/node-app:latest --namespace=${K8S_NAMESPACE}
                             kubectl rollout status deployment/${K8S_DEPLOYMENT_NAME} --namespace=${K8S_NAMESPACE}
                         '''
                     }
