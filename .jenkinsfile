@@ -1,0 +1,63 @@
+pipeline {
+    agent any
+    stages {
+        stage('Checkout') {
+            steps {
+                checkout scm // Jenkins automatically checks out the source code 
+            }
+        }
+        stage('Docker Build') {
+            steps {
+                withCredentials([usernamePassword(
+                    credentialsId: 'DockerHubCred', 
+                    usernameVariable: 'DOCKER_USER', 
+                    passwordVariable: 'DOCKER_PASS'
+                )]) {
+                    // Use the credentials to login and build the image 
+                    sh '''
+                        docker build -t $DOCKER_USER/node-app:latest .
+                    '''
+                }
+            }
+        }
+        stage('Push to Dockerhub') {
+            steps {
+                withCredentials([usernamePassword(
+                    credentialsId: 'DockerHubCred', 
+                    usernameVariable: 'DOCKER_USER', 
+                    passwordVariable: 'DOCKER_PASS'
+                )]) {
+                    sh '''
+                        docker login -u $DOCKER_USER -p $DOCKER_PASS
+                        docker push $DOCKER_USER/node-app:latest
+                    '''
+                }
+            }
+        }
+        stage('Deploy to Kubernetes Cluster') {
+            steps {
+                script {
+                    // Set up kubectl to interact with your Kubernetes cluster
+                    sh 'export KUBEVERSION=$(kubectl version --client=true | grep "Client Version" | awk '{print $3}'
+)'
+                    withCredentials([file(credentialsId: 'kubeconfig', variable: 'KUBECONFIG_FILE')]) {
+                        sh 'export KUBECONFIG=$KUBECONFIG_FILE'
+                        // Apply Kubernetes deployment YAML file
+                        sh '''
+                            kubectl set image deployment/${K8S_DEPLOYMENT_NAME} ${DOCKER_IMAGE}=${DOCKER_REGISTRY}/${DOCKER_IMAGE}:${DOCKER_TAG} --namespace=${K8S_NAMESPACE}
+                            kubectl rollout status deployment/${K8S_DEPLOYMENT_NAME} --namespace=${K8S_NAMESPACE}
+                        '''
+                    }
+            }
+        }
+        }
+        
+    }
+    post {
+        always {
+            // Clean up the Docker images
+            cleanWs()
+        }
+    }
+
+}
