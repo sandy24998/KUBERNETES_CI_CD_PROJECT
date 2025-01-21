@@ -3,7 +3,7 @@ pipeline {
 
     environment {
         // Kubernetes details
-        KUBE_CONFIG = '$HOME/.kube/config'  // Path to the kubeconfig file
+        KUBE_CONFIG = '/var/lib/jenkins/.kube/config'  // Path to the kubeconfig file
         K8S_DEPLOYMENT_NAME = 'node-app-deployment'
         K8S_NAMESPACE = 'default'
     }
