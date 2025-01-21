@@ -61,10 +61,11 @@ pipeline {
                     ) {
                         sh 'export KUBECONFIG=$KUBECONFIG_FILE'
                         // Apply Kubernetes deployment YAML file
-                        sh '''
-                            kubectl set image deployment/${K8S_DEPLOYMENT_NAME} node-app:latest=${DOCKER_USER}/node-app:latest --namespace=${K8S_NAMESPACE}
-                            kubectl rollout status deployment/${K8S_DEPLOYMENT_NAME} --namespace=${K8S_NAMESPACE}
-                        '''
+                        //sh '''
+                        //    kubectl set image deployment/${K8S_DEPLOYMENT_NAME} node-app:latest=${DOCKER_USER}/node-app:latest --namespace=${K8S_NAMESPACE}
+                        //    kubectl rollout status deployment/${K8S_DEPLOYMENT_NAME} --namespace=${K8S_NAMESPACE}
+                        //'''
+                        sh 'kubectl get all'
                     }
             }
         }
