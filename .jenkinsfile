@@ -58,34 +58,34 @@ pipeline {
                 }
             }
         }
+        
         stage('Deploy to Kubernetes Cluster') {
-            steps {
-                script {
-                    // Set up kubectl to interact with your Kubernetes cluster
-                    sh 'export KUBEVERSION=$(kubectl version --client=true | grep "Client Version" | awk '{print $3}'
-)'
-                    withCredentials(
-                        [
-                            file(
-                            credentialsId: 'kubeconfig',
-                            kubeconfigVariable: 'KUBECONFIG_FILE'),
-                            usernamePassword(
-                            credentialsId: 'DockerHubCred', 
-                            usernameVariable: 'DOCKER_USER', 
-                            passwordVariable: 'DOCKER_PASS'
-                        )]
-                    ) {
-                        sh 'export KUBECONFIG=$KUBECONFIG_FILE'
-                        // Apply Kubernetes deployment YAML file
-                        //sh '''
-                        //    kubectl set image deployment/${K8S_DEPLOYMENT_NAME} node-app:latest=${DOCKER_USER}/node-app:latest --namespace=${K8S_NAMESPACE}
-                        //    kubectl rollout status deployment/${K8S_DEPLOYMENT_NAME} --namespace=${K8S_NAMESPACE}
-                        //'''
-                        sh 'kubectl get all'
-                    }
+    steps {
+        script {
+            // Set up kubectl to interact with your Kubernetes cluster
+            sh '''
+                export KUBEVERSION=$(kubectl version --client=true | grep "Client Version" | awk '{print $3}')
+            '''
+            withCredentials([
+                file(credentialsId: 'kubeconfig', variable: 'KUBECONFIG_FILE'),
+                usernamePassword(
+                    credentialsId: 'DockerHubCred', 
+                    usernameVariable: 'DOCKER_USER', 
+                    passwordVariable: 'DOCKER_PASS'
+                )
+            ]) {
+                sh '''
+                    export KUBECONFIG=$KUBECONFIG_FILE
+                    # Apply Kubernetes deployment YAML file (commented out as an example)
+                    # kubectl set image deployment/${K8S_DEPLOYMENT_NAME} node-app:latest=${DOCKER_USER}/node-app:latest --namespace=${K8S_NAMESPACE}
+                    # kubectl rollout status deployment/${K8S_DEPLOYMENT_NAME} --namespace=${K8S_NAMESPACE}
+                    kubectl get all
+                '''
             }
         }
-        }
+    }
+}
+
         
     }
     post {
