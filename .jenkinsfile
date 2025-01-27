@@ -59,6 +59,21 @@ pipeline {
             }
         }
         
+
+        stage('Apply Deployment YAML') {
+            steps {
+                script {
+                    // Apply the deployment YAML file to the cluster
+                    withCredentials([file(credentialsId: 'kubeconfig', variable: 'KUBECONFIG_FILE')]) {
+                        sh '''
+                            export KUBECONFIG=$KUBECONFIG_FILE
+                            kubectl apply -f deployment.yaml --namespace=${K8S_NAMESPACE}
+                        '''
+                    }
+                }
+            }
+        }
+
         stage('Deploy to Kubernetes Cluster') {
     steps {
         script {
