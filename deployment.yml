@@ -15,7 +15,7 @@ spec:
         app: node-app
     spec:
       containers:
-        - name: node-app
+        - name: node-app:latest
           image: "docker.io/node-app:latest"  # This will be updated by the pipeline
           ports:
             - containerPort: 3000
